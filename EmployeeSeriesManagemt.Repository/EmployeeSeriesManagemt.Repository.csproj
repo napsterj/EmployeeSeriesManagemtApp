@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EmployeeSeriesManagemt.Entities\EmployeeSeriesManagemt.Entities.csproj" />
     <ProjectReference Include="..\EmployeeSeriesManagemtApp.DAL\EmployeeSeriesManagemtApp.DAL.csproj" />
   </ItemGroup>
 

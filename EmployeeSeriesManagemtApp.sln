@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmployeeSeriesManagemt.Repo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmployeeSeriesManagemtApp.DAL", "EmployeeSeriesManagemtApp.DAL\EmployeeSeriesManagemtApp.DAL.csproj", "{CBE9DC76-6023-4B3A-8867-1E1883E170D8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmployeeSeriesManagemt.Entities", "EmployeeSeriesManagemt.Entities\EmployeeSeriesManagemt.Entities.csproj", "{78F69A8E-30F2-4CAF-B77C-36F458C954F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{CBE9DC76-6023-4B3A-8867-1E1883E170D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBE9DC76-6023-4B3A-8867-1E1883E170D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CBE9DC76-6023-4B3A-8867-1E1883E170D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78F69A8E-30F2-4CAF-B77C-36F458C954F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78F69A8E-30F2-4CAF-B77C-36F458C954F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78F69A8E-30F2-4CAF-B77C-36F458C954F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78F69A8E-30F2-4CAF-B77C-36F458C954F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
