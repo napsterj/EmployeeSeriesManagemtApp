@@ -4,6 +4,7 @@ using EmployeeSeriesManagemtApp.DAL.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EmployeeSeriesManagemtApp.DAL.Migrations
 {
     [DbContext(typeof(EmployeeSeriesDbContext))]
-    partial class EmployeeSeriesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250311114654_AddedExternalEmployeeIdfToSeriesEntity")]
+    partial class AddedExternalEmployeeIdfToSeriesEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,13 +27,13 @@ namespace EmployeeSeriesManagemtApp.DAL.Migrations
 
             modelBuilder.Entity("AddressEmployee", b =>
                 {
-                    b.Property<int>("AddressesAddressId")
+                    b.Property<int>("AddressesId")
                         .HasColumnType("int");
 
                     b.Property<int>("EmployeesExternalIdf")
                         .HasColumnType("int");
 
-                    b.HasKey("AddressesAddressId", "EmployeesExternalIdf");
+                    b.HasKey("AddressesId", "EmployeesExternalIdf");
 
                     b.HasIndex("EmployeesExternalIdf");
 
@@ -54,11 +57,11 @@ namespace EmployeeSeriesManagemtApp.DAL.Migrations
 
             modelBuilder.Entity("EmployeeSeriesManagemt.Entities.Entity.Address", b =>
                 {
-                    b.Property<int>("AddressId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AddressId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AddressTypeId")
                         .HasColumnType("int");
@@ -103,7 +106,7 @@ namespace EmployeeSeriesManagemtApp.DAL.Migrations
                         .HasMaxLength(5)
                         .HasColumnType("nvarchar(5)");
 
-                    b.HasKey("AddressId");
+                    b.HasKey("Id");
 
                     b.HasIndex("AddressTypeId");
 
@@ -246,7 +249,7 @@ namespace EmployeeSeriesManagemtApp.DAL.Migrations
                 {
                     b.HasOne("EmployeeSeriesManagemt.Entities.Entity.Address", null)
                         .WithMany()
-                        .HasForeignKey("AddressesAddressId")
+                        .HasForeignKey("AddressesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

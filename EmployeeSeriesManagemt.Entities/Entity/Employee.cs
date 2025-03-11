@@ -51,6 +51,9 @@ namespace EmployeeSeriesManagemt.Entities.Entity
         [ForeignKey("Series")]
         public int SeriesCode { get; set; }
         public ICollection<Series>? Series { get; set; }
+        
+        [NotMapped]
+        public EmployeeIdCard? EmployeeCard { get; set; }
        
     }
 }

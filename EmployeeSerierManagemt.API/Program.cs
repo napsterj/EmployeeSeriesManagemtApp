@@ -1,3 +1,4 @@
+using EmployeeSerierManagemt.API.Configurations;
 using EmployeeSeriesManagemtApp.DAL.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,12 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddLogging(config =>
+{
+    config.ClearProviders();    
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
-builder.Services.AddDbContext<EmployeeSeriesDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+DependencyRegistrations.RegisterDependencies(builder);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
