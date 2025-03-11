@@ -35,7 +35,7 @@ namespace EmployeeSerierManagemt.API.Dtos
         public string Building { get; set; }
 
         [StringLength(maximumLength: 10)]
-        public string Floor { get; set; } 
-        public int AddressTypeId { get; set; }
+        public string Floor { get; set; }         
+        public AddressTypeDto AddressType { get; set; } = new();
     }
 }

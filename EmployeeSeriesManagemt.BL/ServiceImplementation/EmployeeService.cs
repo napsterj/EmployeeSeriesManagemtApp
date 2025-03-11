@@ -8,9 +8,9 @@ namespace EmployeeSeriesManagemt.BL.ServiceImplementation
     {
         private readonly IEmployeeRepository _employeeRepo = employeeRepo;
 
-        public HashSet<Address> GetAddressByCity(string cityName, int addressTypeId)
+        public HashSet<Address> GetAddressByCity(string cityName)
         {
-            return _employeeRepo.GetAddressByCity(cityName, addressTypeId)
+            return _employeeRepo.GetAddressByCity(cityName)
                                 .ToHashSet();
         }
 
@@ -46,6 +46,23 @@ namespace EmployeeSeriesManagemt.BL.ServiceImplementation
             
             return newEmployeeSeries.Code > 0 ? newEmployeeSeries 
                                               : new Series();
+        }
+
+        public async Task VerifyNewEmployeeContactDetailsNotExist(Employee employee)
+        {
+            var existingEmployee = await _employeeRepo.VerifyNewEmployeeContactDetailsNotExist(employee);
+            if (existingEmployee is not null)
+            {
+                if (existingEmployee.PhoneNumber == employee.PhoneNumber)
+                    throw new Exception(ConstantsBL.PHONE_NUMBER_DUPLICATE);
+
+                if (existingEmployee.EmailAddress == employee.EmailAddress)
+                    throw new Exception(ConstantsBL.EMAIL_DUPLICATE);
+
+                if (existingEmployee.Number == employee.Number)
+                    throw new Exception(ConstantsBL.NUMBER_DUPLICATE);
+                
+            }                
         }
     }
 }

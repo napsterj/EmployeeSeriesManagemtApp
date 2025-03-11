@@ -2,29 +2,31 @@
 using EmployeeSeriesManagemt.Repository.Interface;
 using EmployeeSeriesManagemtApp.DAL.Context;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
-using System.Runtime.CompilerServices;
 
 namespace EmployeeSeriesManagemt.Repository.Implementation
 {
     public class EmployeeRepository(EmployeeSeriesDbContext context) : IEmployeeRepository
     {
+        private const int PERSONAL_ADDRESS = 1;
+        
         private readonly EmployeeSeriesDbContext _context = context;
 
-        public IEnumerable<Address> GetAddressByCity(string cityName, int addressTypeId)
+        public IEnumerable<Address> GetAddressByCity(string cityName)
         {
             //IQueryable for deferred execution of condition.
-            IQueryable<Address> address = _context.Addresses.AsNoTracking();
+            IQueryable<Address> address = _context.Addresses
+                                                  .Include(x => x.AddressType)
+                                                  .Include(x=>x.Employees)
+                                                  .AsNoTracking();
 
             //Applying filtering on database side.
-            var filteredEmployeeAddress  = address.Where(a => a.AddressTypeId == addressTypeId &&
-                                                      a.City.Equals(cityName, 
-                                                                    StringComparison.CurrentCultureIgnoreCase));
-                                                      
-            var employees = filteredEmployeeAddress.SelectMany(a => a.Employees)
-                                           .AsEnumerable();
+            var filteredEmployeeAddress = address.Where(a => a.AddressTypeId == PERSONAL_ADDRESS &&                                                        
+                                                        a.City == cityName);
 
-            if(employees != null)
+            var employees = filteredEmployeeAddress.SelectMany(a => a.Employees)
+                                                   .AsEnumerable();
+
+            if (employees != null)
             {
                 return filteredEmployeeAddress.AsEnumerable();
             }
@@ -38,13 +40,16 @@ namespace EmployeeSeriesManagemt.Repository.Implementation
                                           .AsNoTracking()
                                           .Where(e => e.ExternalIdf == externalEmployeeIdf)
                                           .SelectMany(e => e.Addresses);
-            
-            if (employeeAddress is not null) 
+
+            if (employeeAddress is not null)
             {
-                return employeeAddress.AsEnumerable();
+                return employeeAddress.AsNoTracking()
+                                      .Include(x=>x.AddressType)
+                                      .Where(x=>x.AddressTypeId == 1)
+                                      .AsEnumerable();
             }
 
-            return [];            
+            return [];
         }
 
         public async Task<Employee> GetEmployeeById(int externalEmployeeIdf)
@@ -61,7 +66,7 @@ namespace EmployeeSeriesManagemt.Repository.Implementation
             return series;
         }
 
-        public IEnumerable<Series> GetEmployeeSeriesByPeriod(int externalEmployeeIdf, 
+        public IEnumerable<Series> GetEmployeeSeriesByPeriod(int externalEmployeeIdf,
                                                              DateOnly startDate, DateOnly endDate)
         {
             //IQueryable for deferred execution of condition.
@@ -69,12 +74,12 @@ namespace EmployeeSeriesManagemt.Repository.Implementation
 
             //Applying filtering on database side dataset size is unpredictable as date range can be few days to many years also.
             var employees = series.Where(s => s.StartDate >= startDate && s.EndDate <= endDate)
-                                  .SelectMany(a => a.Employees!);            
+                                  .SelectMany(a => a.Employees!);
 
             if (employees is not null)
             {
                 return [..employees.Where(e => e.ExternalIdf == externalEmployeeIdf)
-                                   .SelectMany(e => e.Series!)];                         
+                                   .SelectMany(e => e.Series!)];
             }
 
             return [];
@@ -83,30 +88,22 @@ namespace EmployeeSeriesManagemt.Repository.Implementation
         public async Task<Employee> SaveNewEmployee(Employee employee)
         {
             //New employee scenario
-            if(employee.ExternalIdf == 0)
+            if (employee.ExternalIdf == 0)
             {
-                try
+                _context.Employees.Add(employee);
+                await _context.SaveChangesAsync();
+
+                if (employee.EmployeeCard != null)
                 {
-                    _context.Employees.Add(employee);
+                    employee.EmployeeCard.EmployeesExternalIdf = employee.ExternalIdf;
+                    _context.EmployeeIdCards.Add(employee.EmployeeCard);
                     await _context.SaveChangesAsync();
-
-                    if (employee.EmployeeCard != null)
-                    {
-                        employee.EmployeeCard.EmployeesExternalIdf = employee.ExternalIdf;
-                        _context.EmployeeIdCards.Add(employee.EmployeeCard);
-                        await _context.SaveChangesAsync();
-                    }
-
-                    _context.Addresses.AddRange(employee.Addresses);
-                    await _context.SaveChangesAsync();
-
                 }
-                catch
-                {
-                    throw;                    
-                }                
+
+                _context.Addresses.AddRange(employee.Addresses);
+                await _context.SaveChangesAsync();
             }
-            
+
             return employee;
         }
 
@@ -114,16 +111,30 @@ namespace EmployeeSeriesManagemt.Repository.Implementation
         {
             //Checking if the series exists already
             var existingSeries = await _context.Series.FirstOrDefaultAsync(s => s.Code == series.Code);
-            
+
             int externalEmployeeIdf = series.ExternalEmployeeIdf;
-                        
-            if(existingSeries is not null && (existingSeries?.ExternalEmployeeIdf == externalEmployeeIdf))
+            var ownerSeries = await _context.Employees.FirstOrDefaultAsync(e => e.ExternalIdf == externalEmployeeIdf);
+
+            if (existingSeries is null && 
+                ownerSeries is not null &&
+               (existingSeries?.ExternalEmployeeIdf != externalEmployeeIdf))
             {
+                
                 _context.Series.Add(series);
                 await _context.SaveChangesAsync();
+                ownerSeries.Series = new List<Series> { series };
+                await _context.SaveChangesAsync();
             }
-            
+
             return series;
+        }
+
+        public async Task<Employee> VerifyNewEmployeeContactDetailsNotExist(Employee employee)
+        {
+            var existingEmployee = await _context.Employees.FirstOrDefaultAsync(e => e.EmailAddress == employee.EmailAddress ||
+                                                                               e.PhoneNumber == employee.PhoneNumber ||
+                                                                               e.Number == employee.Number);
+            return existingEmployee;
         }
     }
 }

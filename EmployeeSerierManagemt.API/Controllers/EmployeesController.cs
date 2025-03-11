@@ -5,23 +5,28 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using EmployeeSerierManagemt.API.Mapper;
 using EmployeeSerierManagemt.API.Common;
-using EmployeeSeriesManagemt.Entities.Entity;
+using Newtonsoft.Json;
 
 namespace EmployeeSerierManagemt.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EmployeesController(IEmployeeService employeeService) : ControllerBase
+    public class EmployeesController(IEmployeeService employeeService, 
+                                     ILogger<EmployeesController> logger) : ControllerBase
     {
+
         private readonly IEmployeeService _employeeService = employeeService;
+        private readonly ILogger<EmployeesController> _logger = logger;
         private ResponseDto _responseDto = new();
 
         [HttpGet("get/employee/addresses/{externalEmployeeIdf:int}")]
         [ServiceFilter(typeof(ModelStateFilterAttribute))]
         public IActionResult GetEmployeeAddress(int externalEmployeeIdf)
-        {
+        {            
+            _logger.LogInformation($"Accessing endpoint: {nameof(GetEmployeeAddress)}");
+
             if (externalEmployeeIdf == 0)
-            {
+            {                                
                 return BadRequest(GetResponseDto(HttpStatusCode.BadRequest,
                                                            CommonConstants.INVALID_EMPLOYEE_ID));
             }
@@ -31,22 +36,25 @@ namespace EmployeeSerierManagemt.API.Controllers
             var mapper = new AddressMapper();
 
             var addresses = mapper.AddressesToAddressesDto(result);
-
-            return Ok(addresses);
+            
+            var responseDto = GetResponseDto(HttpStatusCode.OK, "", addresses);
+                                    
+            return Ok(responseDto);
 
         }
 
         [HttpGet("get/employee/address/personal")]
         [ServiceFilter(typeof(ModelStateFilterAttribute))]
-        public IActionResult GetPersonalAddressByCity([FromBody] EmployeeAddressDto employeeAddressDto)
+        public IActionResult GetPersonalAddressByCity(string city)
         {
-            var response = _employeeService.GetAddressByCity(employeeAddressDto.City,
-                                                             employeeAddressDto.AddressTypeId);
+            _logger.LogInformation($"Accessing endpoint: {nameof(GetPersonalAddressByCity)}");
+
+            var response = _employeeService.GetAddressByCity(city);
 
             if (response is null || response.Count == 0)
             {
                 var responseDto = GetResponseDto(HttpStatusCode.NotFound,
-                                                 $"{CommonConstants.NO_RECORDS_FOUND} {employeeAddressDto.City}");
+                                                 $"{CommonConstants.NO_RECORDS_FOUND} {city}");
 
                 return NotFound(responseDto);
             }
@@ -69,8 +77,10 @@ namespace EmployeeSerierManagemt.API.Controllers
 
         [HttpGet("get/employee/series/datewise")]
         [ServiceFilter(typeof(ModelStateFilterAttribute))]
-        public IActionResult GetEmployeeSeriesByDates([FromBody] SeriesRequestDto requestDto)
+        public IActionResult GetEmployeeSeriesByDates([FromQuery]SeriesRequestDto requestDto)
         {
+            _logger.LogInformation($"Accessing endpoint: {nameof(GetEmployeeSeriesByDates)}");
+
             var series = _employeeService.GetEmployeeSeriesByPeriod(requestDto.ExternalEmployeeIdf,
                                                                     requestDto.StartDate,
                                                                     requestDto.EndDate);
@@ -93,7 +103,9 @@ namespace EmployeeSerierManagemt.API.Controllers
         [Route("{externalEmployeeIdf:int}", Name = nameof(GetEmployeeById))]
         public async Task<IActionResult> GetEmployeeById(int externalEmployeeIdf)
         {
-            if(externalEmployeeIdf == 0)
+            _logger.LogInformation($"Accessing endpoint: {nameof(GetEmployeeById)}");
+
+            if (externalEmployeeIdf == 0)
             {
                 return BadRequest(GetResponseDto(HttpStatusCode.BadRequest, 
                                                  CommonConstants.INVALID_EMPLOYEE_ID));
@@ -118,6 +130,8 @@ namespace EmployeeSerierManagemt.API.Controllers
         [ServiceFilter(typeof(ModelStateFilterAttribute))]
         public async Task<IActionResult> GetEmployeeSeriesByCode(int seriesCode)
         {
+            _logger.LogInformation($"Accessing endpoint: {nameof(GetEmployeeSeriesByCode)}");
+
             var response = await _employeeService.GetEmployeeSeriesByCode(seriesCode);
 
             var mapper = new SeriesMapper();
@@ -130,13 +144,17 @@ namespace EmployeeSerierManagemt.API.Controllers
         }
 
         [HttpPost("add/employee/new")]
-        //[ServiceFilter(typeof(ModelStateFilterAttribute))]
+        [ServiceFilter(typeof(ModelStateFilterAttribute))]
         public async Task<IActionResult> SaveEmployee([FromBody]EmployeeDto employeeDto)
         {
+            _logger.LogInformation($"Accessing endpoint: {nameof(SaveEmployee)}");
+
             var employeeMapper = new EmployeeMapper();
             var employeeCardMapper = new EmployeeIdCardMapper();
 
             var employee = employeeMapper.EmployeeDtoToEmployee(employeeDto);
+
+            await _employeeService.VerifyNewEmployeeContactDetailsNotExist(employee);            
             
             if (employeeDto.EmployeeIdCardsDto is not null)
             {
@@ -161,10 +179,12 @@ namespace EmployeeSerierManagemt.API.Controllers
         }
 
         [HttpPost("add/employee/series")]
-        public async Task<IActionResult> SaveEmployeeSeries([FromBody] SeriesDto seriesDto)
+        public async Task<IActionResult> SaveEmployeeSeries([FromBody]SeriesRequestDto seriesRequestDto)
         {
-            var mapper = new SeriesResponseMapper();
-            var newSeries = mapper.SeriesDtoToSeries(seriesDto);
+            _logger.LogInformation($"Accessing endpoint: {nameof(SaveEmployeeSeries)}");
+
+            var mapper = new SeriesRequestMapper();
+            var newSeries = mapper.SeriesRequestDtoToSeries(seriesRequestDto);
 
             var response = await _employeeService.SaveNewEmployeeSeries(newSeries);
 
@@ -182,6 +202,16 @@ namespace EmployeeSerierManagemt.API.Controllers
             _responseDto.Result = result;
             _responseDto.StatusCode = statusCode;
             _responseDto.ErrorMessage = errorMessage;
+
+            if (result != null)
+            {
+                _logger.LogInformation($"{Environment.NewLine} " + 
+                                       $"Successful Response: {JsonConvert.SerializeObject(result)}" +
+                                       $"{Environment.NewLine}");
+            }
+            else { 
+                _logger.LogError($"Error: {errorMessage}"); 
+            }
             return _responseDto;
         }
 
