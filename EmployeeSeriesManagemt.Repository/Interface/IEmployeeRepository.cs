@@ -4,7 +4,7 @@ namespace EmployeeSeriesManagemt.Repository.Interface
 {
     public interface IEmployeeRepository
     {
-        IEnumerable<Address> GetAddressesByEmployeeId(int externalEmployeeIdf);
+        (IEnumerable<Address>, string) GetAddressesByEmployeeId(int externalEmployeeIdf);
         IEnumerable<Address> GetAddressByCity(string cityName);
         IEnumerable<Series> GetEmployeeSeriesByPeriod(int externalEmployeeIdf, DateOnly startDate, DateOnly endDate);
         Task<Employee> GetEmployeeById(int externalEmployeeIdf);

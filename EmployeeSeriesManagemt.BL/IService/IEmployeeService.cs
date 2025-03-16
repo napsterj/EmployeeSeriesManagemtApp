@@ -4,7 +4,7 @@ namespace EmployeeSeriesManagemt.BL.IService
 {
     public interface IEmployeeService
     {
-        IEnumerable<Address> GetAddressesByEmployeeId(int externalEmployeeIdf);
+        (IEnumerable<Address>, string) GetAddressesByEmployeeId(int externalEmployeeIdf);
         HashSet<Address> GetAddressByCity(string cityName);
         HashSet<Series> GetEmployeeSeriesByPeriod(int externalEmployeeIdf, DateOnly startDate, DateOnly endDate);
         Task<Employee> GetEmployeeById(int externalEmployeeIdf);

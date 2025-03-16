@@ -38,4 +38,19 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+ApplyMigrations();
+
 app.Run();
+
+// Method that will check if any migrations are pending. If so will run them.
+void ApplyMigrations()
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<EmployeeSeriesDbContext>();
+        if (db.Database.GetPendingMigrations().Count() > 0)
+        {
+            db.Database.Migrate();
+        }
+    }
+}

@@ -1,0 +1,75 @@
+﻿@model List<EmployeeAddressResponseDto>
+@{
+    ViewBag.Title = "Results";
+}
+
+<div class="container-fluid">
+    @if (Model is not null && Model.Count > 0)
+    {
+        
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            <div class="row">
+                <div class="col m-4 p-4">
+                    <div class="card mb-3">
+                        <div class="card-header bg-info">
+                            <p><h4 class="text-black">Name: @Model.ElementAt(i).EmployeeNamesId[0].Item1</h4></p>
+                        </div>
+                        <div class="card-body bg-black">
+                            <h5 class="card-title text-light">Address</h5>
+                            <p class="card-text">
+                                <div class="col text-light">
+                                    <div class="row">
+                                        <div class="col">
+                                            <p>Street: </p>
+                                            <p>@Model.ElementAt(i).Address.Street</p>
+                                        </div>
+                                        <div class="col">
+                                            <p>Building: </p>
+                                            <p>@Model.ElementAt(i).Address.Building</p>
+                                        </div>
+                                        <div class="col">
+                                            <p>Number: </p>
+                                            <p>@Model.ElementAt(i).Address.Number</p>
+                                        </div>
+                                        <div class="col">
+                                            <p>Mailbox No.: </p>
+                                            <p>@Model.ElementAt(i).Address.MailBoxNumber</p>
+                                        </div>
+                                        <div class="col">
+                                            <p>Floor: </p>
+                                            <p>@Model.ElementAt(i).Address.Floor</p>
+                                        </div>
+                                        <div class="col">
+                                            <p>City: </p>
+                                            <p>@Model.ElementAt(i).Address.City, @Model.ElementAt(i).Address.ZipCode</p>
+                                        </div>
+                                        <div class="col">
+                                            <p>Country: </p>
+                                            <p>@Model.ElementAt(i).Address.Country</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </p>
+                            <a asp-controller="Employee"
+                               asp-action="GetEmployeeDetails"
+                               asp-route-Id="@Model.ElementAt(i).EmployeeNamesId[0].Item2" class="btn btn-info text-light">Add Employee Series - @Model.ElementAt(i).EmployeeNamesId[0].Item1</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+    }
+    else
+    {
+        <br/>
+        <div class="row">
+            <div class="col">
+                <p>
+                    <span class="text-center text-danger">@ViewData["NoRecords"]</span>
+                </p>
+            </div>
+        </div>
+    }
+</div>

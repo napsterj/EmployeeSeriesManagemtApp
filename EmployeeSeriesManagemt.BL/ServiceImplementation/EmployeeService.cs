@@ -14,7 +14,7 @@ namespace EmployeeSeriesManagemt.BL.ServiceImplementation
                                 .ToHashSet();
         }
 
-        public IEnumerable<Address> GetAddressesByEmployeeId(int externalEmployeeIdf)
+        public (IEnumerable<Address>, string) GetAddressesByEmployeeId(int externalEmployeeIdf)
         {
             return _employeeRepo.GetAddressesByEmployeeId(externalEmployeeIdf);
         }

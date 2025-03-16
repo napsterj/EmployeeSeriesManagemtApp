@@ -24,13 +24,13 @@ namespace EmployeeSeriesManagemtApp.DAL.Migrations
 
             modelBuilder.Entity("AddressEmployee", b =>
                 {
-                    b.Property<int>("AddressesAddressId")
+                    b.Property<int>("AddressesId")
                         .HasColumnType("int");
 
                     b.Property<int>("EmployeesExternalIdf")
                         .HasColumnType("int");
 
-                    b.HasKey("AddressesAddressId", "EmployeesExternalIdf");
+                    b.HasKey("AddressesId", "EmployeesExternalIdf");
 
                     b.HasIndex("EmployeesExternalIdf");
 
@@ -54,11 +54,11 @@ namespace EmployeeSeriesManagemtApp.DAL.Migrations
 
             modelBuilder.Entity("EmployeeSeriesManagemt.Entities.Entity.Address", b =>
                 {
-                    b.Property<int>("AddressId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AddressId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AddressTypeId")
                         .HasColumnType("int");
@@ -103,7 +103,7 @@ namespace EmployeeSeriesManagemtApp.DAL.Migrations
                         .HasMaxLength(5)
                         .HasColumnType("nvarchar(5)");
 
-                    b.HasKey("AddressId");
+                    b.HasKey("Id");
 
                     b.HasIndex("AddressTypeId");
 
@@ -246,7 +246,7 @@ namespace EmployeeSeriesManagemtApp.DAL.Migrations
                 {
                     b.HasOne("EmployeeSeriesManagemt.Entities.Entity.Address", null)
                         .WithMany()
-                        .HasForeignKey("AddressesAddressId")
+                        .HasForeignKey("AddressesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

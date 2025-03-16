@@ -1,0 +1,160 @@
+﻿@model EmployeeDto
+@{
+    ViewBag.title = "Employee Profile";
+}
+@if(Model != null)
+{    
+    <div class="container-fluid">
+        <form class="form-check" method="post" asp-controller="Employee" 
+        asp-action="SaveEmployeeSeries">
+
+            <div class="row">
+                <div class="col">
+                    <input type="hidden" asp-for="ExternalIdf" />
+                    <label class="form-label" asp-for="FirstName">First Name:</label>
+                </div>
+                <div class="col">
+                    <p class="text-info">@Model.FirstName</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label class="form-label" asp-for="LastName">Last Name:</label>
+                </div>
+                <div class="col">
+                    <p class="text-info">@Model.LastName</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label class="form-label" asp-for="UserId">User Id:</label>
+                </div>
+                <div class="col">
+                    <p class="text-info">@Model.UserId</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label class="form-label" asp-for="Number">Number</label>
+                </div>
+                <div class="col">
+                    <p class="text-info">@Model.Number</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <label class="form-label" asp-for="Nationality">Nationality</label>
+                </div>
+                <div class="col">
+                    <p class="text-info">@Model.Nationality</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label class="form-label" asp-for="EmailAddress">Email:</label>
+                </div>
+                <div class="col">
+                    <p class="text-info">@Model.EmailAddress</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label class="form-label" asp-for="OrganizationalUnit">Org. Unit</label>
+                </div>
+                <div class="col">
+                    <p class="text-info">@Model.OrganizationalUnit</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <label class="form-label" class="form-label" asp-for="PhoneNumber">Phone: </label>
+                </div>
+                <div class="col-6">
+                    <p class="text-info">@Model.PhoneNumber</p>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-6">
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        Add New Employee Series
+                    </button>                   
+                </div>
+                <div class="col-6">
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">New Employee Series</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <label class="form-label" asp-for="SeriesRequestDto.StartDate">Start Date</label>                                                
+                                            </div>
+                                            <div class="col-sm-6">                                                
+                                                <input type="date" class="form-control" asp-for="SeriesRequestDto.StartDate"/>
+                                            </div>                                           
+                                        </div>
+                                        <div class="row mh-3">
+                                            <div class="col-sm-6">
+                                                <label class="form-label" asp-for="SeriesRequestDto.EndDate">End Date</label>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <input type="date" class="form-control" asp-for="SeriesRequestDto.EndDate" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Save changes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-5">
+                <div class="col">
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>                                
+                                <th scope="col">Code</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Start Date</th>
+                                <th scope="col">End Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(Model.Series.Count > 0)
+                            {
+                                @foreach(var item in Model.Series)
+                                {
+                                    <tr class="table-active">
+                                        <th scope="row">@item.Code</th>
+                                        <td>@item.Name</td>
+                                        <td>@item.StartDate.ToShortDateString()</td>
+                                        <td>@item.EndDate.ToShortDateString()</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr class="table-danger">
+                                    <td colspan="4" class="text-center">No series added.</td>
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </div>
+}
+

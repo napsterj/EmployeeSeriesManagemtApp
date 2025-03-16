@@ -63,7 +63,7 @@ namespace EmployeeSerierManagemt.API.Dtos
         public string PhoneNumber { get; set; } = string.Empty;
 
         public List<AddressDto> Addresses { get; set; } = [];
-
+        public List<SeriesRequestDto>? Series { get; set; }
         public EmployeeIdCardsDto? EmployeeIdCardsDto { get; set; }
     }
 }

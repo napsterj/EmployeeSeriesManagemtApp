@@ -33,7 +33,9 @@ namespace EmployeeSeriesManagemt.Entities.Entity
         [StringLength(maximumLength: 10)]
         public string Floor { get; set; }
         public ICollection<Employee> Employees { get; set; } = new List<Employee>();
+        
+        [ForeignKey("AddressType")]
         public int AddressTypeId { get; set; }
-        public AddressType AddressType { get; set; }        
+        public AddressType AddressType { get; set; }  = new AddressType();      
     }
 }

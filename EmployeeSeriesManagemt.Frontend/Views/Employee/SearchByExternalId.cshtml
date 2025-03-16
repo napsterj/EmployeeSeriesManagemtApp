@@ -1,0 +1,18 @@
+﻿@model EmployeeAddressVM
+@{
+    ViewBag.title = "Search address of an employee by external id.";
+}
+<form method="post" asp-controller="Employee" asp-action="SearchByExternalId">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <label asp-for="ExternalEmployeeIdf">External Employee Idf: </label>
+                <input type="text" name="externalEmployeeIdf" asp-for="ExternalEmployeeIdf" placeholder="Enter the ExternalExployeeIdf" />
+                <span asp-validation-for="ExternalEmployeeIdf" class="text-danger"></span>
+                <button type="submit" class="btn btn-warning">Search</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<partial name="_EmployeeAddressById" data="@Model"></partial>

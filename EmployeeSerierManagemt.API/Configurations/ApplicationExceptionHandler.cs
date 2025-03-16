@@ -10,6 +10,7 @@ namespace EmployeeSerierManagemt.API.Configurations
                                               Exception exception, 
                                               CancellationToken cancellationToken)
         {
+            
             var problemDetails = new ProblemDetails
             {
                 Title = "An error occurred",
@@ -17,9 +18,10 @@ namespace EmployeeSerierManagemt.API.Configurations
                 Type = exception.GetType().Name, 
                 Detail = exception.Message
             };
-
-            httpContext.Response.StatusCode = problemDetails.Status.Value;
             
+            httpContext.Response.StatusCode = problemDetails.Status.Value;
+
+            //Writing errors to the console.
             await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
 
             return true;

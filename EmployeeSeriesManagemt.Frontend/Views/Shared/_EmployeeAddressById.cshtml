@@ -1,0 +1,72 @@
+﻿@model EmployeeAddressVM
+@{
+
+}
+<div class="container-fluid">
+@if (Model != null && Model.Addresses!.Count() > 0)
+{
+    @foreach(var item in Model.Addresses!)
+    {
+        <div class="row">
+            <div class="col m-4 p-5">
+                <div class="card bg-info mb-3">
+                    <div class="card-header">
+                        <p><h4 class="text-black">Name: @Model.EmployeeName</h4></p>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Address</h5>
+                        <p class="card-text">
+                            <div class="col">
+                                <div class="row">
+                                    <div class="col">
+                                        <p>Street: </p>
+                                        <p>@item.Street</p>
+                                    </div>
+                                    <div class="col">
+                                        <p>Building: </p>
+                                        <p>@item.Building</p>
+                                    </div>
+                                    <div class="col">
+                                        <p>Number: </p>
+                                        <p>@item.Number</p>
+                                    </div>
+                                    <div class="col">
+                                        <p>Mailbox No.: </p>
+                                        <p>@item.MailBoxNumber</p>
+                                    </div>
+                                    <div class="col">
+                                        <p>Floor: </p>
+                                        <p>@item.Floor</p>
+                                    </div>
+                                    <div class="col">
+                                        <p>City: </p>
+                                        <p>@item.City, @item.ZipCode</p>
+                                    </div>
+                                    <div class="col">
+                                        <p>Country: </p>
+                                        <p>@item.Country</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                        @* <a asp-controller="Employee"
+                           asp-action="CreateEmployeeSeries"
+                           asp-route-externalId="@Model.ElementAt(i).EmployeeNamesId[0].Item2" class="btn btn-warning text-danger">Add Employee Series - @Model.ElementAt(i).EmployeeNamesId[0].Item1</a> *@
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <br />
+    <div class="row">
+        <div class="col">
+            <p>
+                <span class="text-center text-danger">@Model!.ErrorMessage</span>
+            </p>
+        </div>
+    </div>
+}
+</div>

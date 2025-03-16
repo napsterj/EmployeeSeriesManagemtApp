@@ -2,6 +2,10 @@
 using EmployeeSeriesManagemt.Repository.Interface;
 using EmployeeSeriesManagemtApp.DAL.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Net;
+using System.Security.Principal;
+using System.Transactions;
 
 namespace EmployeeSeriesManagemt.Repository.Implementation
 {
@@ -34,7 +38,7 @@ namespace EmployeeSeriesManagemt.Repository.Implementation
             return [];
         }
 
-        public IEnumerable<Address> GetAddressesByEmployeeId(int externalEmployeeIdf)
+        public (IEnumerable<Address>, string) GetAddressesByEmployeeId(int externalEmployeeIdf)
         {
             var employeeAddress = _context.Employees
                                           .AsNoTracking()
@@ -43,21 +47,46 @@ namespace EmployeeSeriesManagemt.Repository.Implementation
 
             if (employeeAddress is not null)
             {
-                return employeeAddress.AsNoTracking()
-                                      .Include(x=>x.AddressType)
-                                      .Where(x=>x.AddressTypeId == 1)
-                                      .AsEnumerable();
+                var addresses = employeeAddress.AsNoTracking()
+                                               .Include(x=>x.AddressType)
+                                               .Where(x=>x.AddressTypeId == 1)
+                                               .AsEnumerable();
+
+                var employee = Task.Run(() => GetEmployeeById(externalEmployeeIdf))
+                                                .GetAwaiter()
+                                                .GetResult();
+                
+                if (employee is not null) 
+                {
+                    return (addresses, String.Concat(employee.FirstName," ", employee.LastName));
+                }
+
             }
 
-            return [];
+            return ([], string.Empty);
         }
 
         public async Task<Employee> GetEmployeeById(int externalEmployeeIdf)
         {
-            var response = await _context.Employees
-                                         .FirstOrDefaultAsync(e => e.ExternalIdf == externalEmployeeIdf);
+            try
+            {
+                var response = await _context.Employees
+                                                .Include(x => x.Series)
+                                                .AsNoTracking()
+                                                .FirstOrDefaultAsync(e => e.ExternalIdf == externalEmployeeIdf);
+                if (response != null)
+                {
+                    response.EmployeeCard = new EmployeeIdCard();
+                    response.Series = response.Series ?? new List<Series>();
+                    return response;
+                }
+            }
+            catch(Exception ex)
+            {
 
-            return response!;
+            }
+
+            return new Employee();
         }
 
         public async Task<Series> GetEmployeeSeriesByCode(int seriesCode)
@@ -79,7 +108,7 @@ namespace EmployeeSeriesManagemt.Repository.Implementation
             if (employees is not null)
             {
                 return [..employees.Where(e => e.ExternalIdf == externalEmployeeIdf)
-                                   .SelectMany(e => e.Series!)];
+                                   .SelectMany(e => e.Series!).Distinct()];
             }
 
             return [];
@@ -87,21 +116,60 @@ namespace EmployeeSeriesManagemt.Repository.Implementation
 
         public async Task<Employee> SaveNewEmployee(Employee employee)
         {
+
             //New employee scenario
             if (employee.ExternalIdf == 0)
             {
-                _context.Employees.Add(employee);
-                await _context.SaveChangesAsync();
-
-                if (employee.EmployeeCard != null)
+                using (var transaction = _context.Database.BeginTransaction())
                 {
-                    employee.EmployeeCard.EmployeesExternalIdf = employee.ExternalIdf;
-                    _context.EmployeeIdCards.Add(employee.EmployeeCard);
-                    await _context.SaveChangesAsync();
-                }
+                    try
+                    {                                                
+                        _context.Employees.Add(employee);                     
+                        
+                        if (employee.EmployeeCard != null)
+                        {                           
+                            _context.EmployeeIdCards.Add(employee.EmployeeCard);                            
+                        }
+                        
+                        foreach(var address in employee.Addresses)
+                        {
+                            _context.Addresses.Add(address);                        
+                        }
 
-                _context.Addresses.AddRange(employee.Addresses);
-                await _context.SaveChangesAsync();
+                        if (employee.Series != null)
+                        {
+                            foreach (var series in employee.Series)
+                            {
+                                _context.Series.Add(series);
+                            }
+                        }
+
+                        await _context.SaveChangesAsync();
+
+                        // Whenever I was adding a new employee to the database with address and series, two empty rows were automatically
+                        //inserted in the AddressType table.
+                        //I had to write the below hack as a way to fix the above issue (screenshot in the email). Here I am updating the
+                        //AddressTypeId back to 1 - Personal and 2 - Work 
+
+                        var addresses = (from at in _context.AddressTypes
+                                      join ad in _context.Addresses on at.Id equals ad.AddressTypeId
+                                      where ad.AddressTypeId != 1 && ad.AddressTypeId != 2
+                                      select ad).ToList();
+
+                        for(int i = 0; i < addresses.Count; i++)
+                        {
+                            addresses[i].AddressTypeId = i + 1;
+                            await _context.SaveChangesAsync();
+                        }
+                        
+                        transaction.Commit();                                            
+                    }
+                    catch (Exception ex) 
+                    {
+                        transaction.Rollback();
+                        throw new Exception("Error saving the new employee Data");
+                    }
+                }
             }
 
             return employee;
@@ -110,20 +178,20 @@ namespace EmployeeSeriesManagemt.Repository.Implementation
         public async Task<Series> SaveNewEmployeeSeries(Series series)
         {
             //Checking if the series exists already
-            var existingSeries = await _context.Series.FirstOrDefaultAsync(s => s.Code == series.Code);
-
+            var existingSeries = await _context.Series.FirstOrDefaultAsync(s => s.ExternalEmployeeIdf == series.ExternalEmployeeIdf);
+                        
             int externalEmployeeIdf = series.ExternalEmployeeIdf;
             var ownerSeries = await _context.Employees.FirstOrDefaultAsync(e => e.ExternalIdf == externalEmployeeIdf);
-
-            if (existingSeries is null && 
+            
+            if (existingSeries is null &&
                 ownerSeries is not null &&
                (existingSeries?.ExternalEmployeeIdf != externalEmployeeIdf))
-            {
-                
+            {                
                 _context.Series.Add(series);
                 await _context.SaveChangesAsync();
-                ownerSeries.Series = new List<Series> { series };
-                await _context.SaveChangesAsync();
+                
+                //ownerSeries?.EmployeeSeries?.Add(series);
+                //await _context.SaveChangesAsync();
             }
 
             return series;

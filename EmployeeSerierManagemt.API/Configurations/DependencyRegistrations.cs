@@ -19,6 +19,7 @@ namespace EmployeeSerierManagemt.API.Configurations
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
+            builder.Services.AddScoped<DbContext, EmployeeSeriesDbContext>();
             builder.Services.AddScoped<ModelStateFilterAttribute>();
             builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();            
             builder.Services.AddScoped<IEmployeeService, EmployeeService>();
