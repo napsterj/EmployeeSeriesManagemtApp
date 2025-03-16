@@ -183,9 +183,7 @@ namespace EmployeeSeriesManagemt.Repository.Implementation
             int externalEmployeeIdf = series.ExternalEmployeeIdf;
             var ownerSeries = await _context.Employees.FirstOrDefaultAsync(e => e.ExternalIdf == externalEmployeeIdf);
             
-            if (existingSeries is null &&
-                ownerSeries is not null &&
-               (existingSeries?.ExternalEmployeeIdf != externalEmployeeIdf))
+            if (ownerSeries is not null)
             {                
                 _context.Series.Add(series);
                 await _context.SaveChangesAsync();
