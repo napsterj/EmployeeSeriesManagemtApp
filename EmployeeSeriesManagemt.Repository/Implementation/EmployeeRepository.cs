@@ -190,8 +190,8 @@ namespace EmployeeSeriesManagemt.Repository.Implementation
                 _context.Series.Add(series);
                 await _context.SaveChangesAsync();
                 
-                //ownerSeries?.EmployeeSeries?.Add(series);
-                //await _context.SaveChangesAsync();
+                ownerSeries?.Series?.Add(series);
+                await _context.SaveChangesAsync();
             }
 
             return series;
