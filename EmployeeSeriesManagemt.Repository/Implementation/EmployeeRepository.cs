@@ -3,7 +3,9 @@ using EmployeeSeriesManagemt.Repository.Interface;
 using EmployeeSeriesManagemtApp.DAL.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Transactions;
 
@@ -70,14 +72,21 @@ namespace EmployeeSeriesManagemt.Repository.Implementation
         {
             try
             {
-                var response = await _context.Employees
+                var response = _context.Employees
                                                 .Include(x => x.Series)
                                                 .AsNoTracking()
-                                                .FirstOrDefaultAsync(e => e.ExternalIdf == externalEmployeeIdf);
-                if (response != null)
+                                                .FirstOrDefault(e => e.ExternalIdf == externalEmployeeIdf);
+                if (response != null )
                 {
                     response.EmployeeCard = new EmployeeIdCard();
-                    response.Series = response.Series ?? new List<Series>();
+                    IQueryable<Series> allEmployeeSeries = _context.Series.Where(e => e.ExternalEmployeeIdf == externalEmployeeIdf);
+                    
+                    if (response.Series != null && response.Series.Any())
+                    {
+                        response.Series = await allEmployeeSeries.ToListAsync();
+                        return response;
+                    }
+                    response.Series = new List<Series>();
                     return response;
                 }
             }
@@ -178,7 +187,7 @@ namespace EmployeeSeriesManagemt.Repository.Implementation
         public async Task<Series> SaveNewEmployeeSeries(Series series)
         {
             //Checking if the series exists already
-            var existingSeries = await _context.Series.FirstOrDefaultAsync(s => s.ExternalEmployeeIdf == series.ExternalEmployeeIdf);
+            IQueryable<Series> existingSeries = _context.Series.Where(s => s.ExternalEmployeeIdf == series.ExternalEmployeeIdf);
                         
             int externalEmployeeIdf = series.ExternalEmployeeIdf;
             var ownerSeries = await _context.Employees.FirstOrDefaultAsync(e => e.ExternalIdf == externalEmployeeIdf);

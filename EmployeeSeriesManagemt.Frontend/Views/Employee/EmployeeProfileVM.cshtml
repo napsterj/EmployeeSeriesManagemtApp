@@ -35,6 +35,14 @@
             </div>
             <div class="row">
                 <div class="col">
+                    <label class="form-label" asp-for="ExternalIdf">External Idf</label>
+                </div>
+                <div class="col">
+                    <p class="text-info">@Model.ExternalIdf</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
                     <label class="form-label" asp-for="Number">Number</label>
                 </div>
                 <div class="col">
@@ -124,8 +132,7 @@
                     <table class="table table-dark">
                         <thead>
                             <tr>                                
-                                <th scope="col">Code</th>
-                                <th scope="col">Name</th>
+                                <th scope="col">Code</th>                                
                                 <th scope="col">Start Date</th>
                                 <th scope="col">End Date</th>
                             </tr>
@@ -136,8 +143,7 @@
                                 @foreach(var item in Model.Series)
                                 {
                                     <tr class="table-active">
-                                        <th scope="row">@item.Code</th>
-                                        <td>@item.Name</td>
+                                        <th scope="row">@item.Code</th>                                      
                                         <td>@item.StartDate.ToShortDateString()</td>
                                         <td>@item.EndDate.ToShortDateString()</td>
                                     </tr>
