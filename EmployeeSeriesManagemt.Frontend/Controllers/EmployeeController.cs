@@ -125,6 +125,8 @@ namespace EmployeeSeriesManagemt.Frontend.Controllers
             {               
                 var output = JsonConvert.DeserializeObject<DeserializeHandlerEmployeeProfile>(Convert.ToString(response.Result));
                 employeeDto = output?.Result;
+                employeeDto!.Series = employeeDto.Series.OrderBy(x => x.StartDate)
+                                                       .OrderBy(x => x.EndDate).ToList();
             }
             if (employeeDto != null)
             {                

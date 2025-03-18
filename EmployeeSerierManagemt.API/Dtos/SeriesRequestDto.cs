@@ -2,6 +2,7 @@
 {
     public class SeriesRequestDto
     {
+        public int Code { get; set; }
         public int ExternalEmployeeIdf { get; set; }             
         public string? Name { get; set; }
         public DateOnly StartDate { get; set; }
